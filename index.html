@@ -198,14 +198,22 @@ async function search(){
     loading.style.display="none";
     btn.disabled=false;
 
-    if(data.success){
-      resultBox.className="result success";
-      resultBox.innerHTML=`
-        <strong>Họ tên:</strong> ${keyword}<br>
-        <strong>Số báo danh:</strong> ${data.id}<br><br>
-        <button onclick="window.location.href='${data.url}'">Xem chi tiết</button>
-      `;
-      resultBox.style.display="block";
+  if(data.success){
+    const d = data.data;
+  
+    resultBox.className="result success";
+    resultBox.innerHTML=`
+      <h3>Kết quả chi tiết</h3>
+      <p><b>Họ tên:</b> ${d.name}</p>
+      <p><b>Số báo danh:</b> ${d.sbd}</p>
+      <p><b>Lớp:</b> ${d.lop}</p>
+      <p><b>Ngày sinh:</b> ${d.ngaysinh}</p>
+      <hr>
+      <p><b>Phòng:</b> ${d.phong}</p>
+      <p><b>STT trong phòng:</b> ${d.stt}</p>
+    `;
+    resultBox.style.display="block";
+
     }else{
       showError(data.error || "Không tìm thấy thông tin.");
     }
@@ -227,3 +235,4 @@ function showError(msg){
 
 </body>
 </html>
+
