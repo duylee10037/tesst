@@ -1,128 +1,209 @@
-export default async function handler(req, res) {
-    if (req.method !== "POST") {
-        return res.status(405).json({ error: "Method not allowed" });
-    }
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tra cứu số báo danh</title>
 
-    try {
-        const { keyword } = req.body;
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800&family=Inter:wght@400;500&display=swap" rel="stylesheet">
 
-        if (!keyword) {
-            return res.status(400).json({ error: "Thiếu keyword" });
-        }
-
-        const response = await fetch("https://c3thachban.edu.vn/index.php", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/x-www-form-urlencoded",
-                "User-Agent": "Mozilla/5.0",
-                "Referer": "https://c3thachban.edu.vn/index.php?language=vi&nv=tracuu"
-            },
-            body: new URLSearchParams({
-                language: "vi",
-                nv: "tracuu",
-                op: "postkw",
-                keywords: keyword
-            })
-        });
-
-        const text = await response.text();
-
-        const match = text.match(/OK_(\d+)/);
-
-        if (!match) {
-            return res.status(404).json({ error: "Không tìm thấy ID" });
-        }
-
-        const id = match[1];
-
-        return res.status(200).json({
-            success: true,
-            id: id,
-            url: `https://c3thachban.edu.vn/index.php?language=vi&nv=tracuu&op=show_kqs&id=${id}`
-        });
-
-    } catch (err) {
-        return res.status(500).json({ error: "Lỗi hệ thống" });
-    }
+<style>
+:root{
+  --green:#2E7D32;
+  --green-light:#E8F5E9;
+  --green-dark:#1B5E20;
 }
 
+*{margin:0;padding:0;box-sizing:border-box;}
 
-async function search() {
-    const keyword = document.getElementById("keyword").value.trim();
-    const btn = document.getElementById("btn");
-    const spinner = document.getElementById("spinner");
-
-    if (!keyword) {
-        showToast("Vui lòng nhập họ tên đầy đủ");
-        return;
-    }
-
-    btn.disabled = true;
-    spinner.style.display = "block";
-
-    try {
-        // Giả sử endpoint tra cứu là /tracuu hoặc lấy từ tin tức gần nhất
-        // Bạn cần kiểm tra thực tế: inspect form trên trang trường xem action là gì
-        // Ví dụ phổ biến: https://c3thachban.edu.vn/tracuu hoặc POST đến một path cụ thể
-        const formData = new FormData();
-        formData.append("keyword", keyword);  // hoặc "hoten", "tenhs" tùy form thật
-
-        const response = await fetch("https://c3thachban.edu.vn/tracuu", {  // ← thay bằng endpoint thật nếu khác
-            method: "POST",
-            body: formData
-        });
-
-        if (!response.ok) throw new Error("Lỗi kết nối");
-
-        const html = await response.text();
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(html, "text/html");
-
-        // Parse thông tin - phần này cần điều chỉnh tùy cấu trúc HTML thực tế của trường
-        // Thường kết quả nằm trong <table>, <div class="result"> hoặc <p>
-        let resultText = "";
-        const table = doc.querySelector("table"); // hoặc ".result-table", "tbody"
-        if (table) {
-            const rows = table.querySelectorAll("tr");
-            for (let row of rows) {
-                const cells = row.querySelectorAll("td, th");
-                if (cells.length >= 2) {
-                    const label = cells[0].innerText.trim();
-                    const value = cells[1].innerText.trim();
-                    if (label && value) {
-                        resultText += `<p><strong>${label}:</strong> ${value}</p>`;
-                    }
-                }
-            }
-        } else {
-            // Nếu không có table, thử lấy text từ div hoặc p chính
-            const mainContent = doc.querySelector(".content, .result, body"); // fallback
-            resultText = mainContent ? mainContent.innerHTML : "Không tìm thấy dữ liệu";
-        }
-
-        if (resultText.includes("không tìm thấy") || !resultText) {
-            showToast("Không tìm thấy thông tin học sinh");
-        } else {
-            document.getElementById("resultContent").innerHTML = resultText;
-            document.getElementById("resultModal").style.display = "flex";
-            setTimeout(() => {
-                document.querySelector(".result-card").classList.add("show");
-            }, 100);
-            showToast("Tra cứu thành công!");
-        }
-
-    } catch (err) {
-        console.error(err);
-        showToast("Lỗi: " + (err.message || "Không thể kết nối đến hệ thống trường"));
-    }
-
-    btn.disabled = false;
-    spinner.style.display = "none";
+body{
+  font-family:'Inter',sans-serif;
+  min-height:100vh;
+  background:linear-gradient(135deg,#E8F5E9,#ffffff);
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  padding:20px;
 }
 
-function closeModal() {
-    const modal = document.getElementById("resultModal");
-    const card = document.querySelector(".result-card");
-    card.classList.remove("show");
-    setTimeout(() => { modal.style.display = "none"; }, 500);
+.container{
+  width:100%;
+  max-width:600px;
 }
+
+h1{
+  font-family:'Outfit',sans-serif;
+  font-size:32px;
+  font-weight:800;
+  margin-bottom:10px;
+  color:var(--green-dark);
+}
+
+.subtitle{
+  color:#555;
+  margin-bottom:30px;
+}
+
+.card{
+  background:white;
+  padding:40px;
+  border-radius:25px;
+  box-shadow:0 20px 50px rgba(0,0,0,0.1);
+}
+
+input{
+  width:100%;
+  padding:15px;
+  border-radius:15px;
+  border:2px solid #ddd;
+  font-size:15px;
+  margin-bottom:20px;
+  transition:0.3s;
+}
+
+input:focus{
+  border-color:var(--green);
+}
+
+button{
+  width:100%;
+  padding:15px;
+  border:none;
+  border-radius:40px;
+  font-weight:600;
+  background:linear-gradient(45deg,var(--green),#66BB6A);
+  color:white;
+  cursor:pointer;
+  transition:0.3s;
+}
+
+button:hover{
+  transform:translateY(-3px);
+}
+
+button:disabled{
+  opacity:0.6;
+}
+
+.result{
+  margin-top:25px;
+  padding:20px;
+  border-radius:15px;
+  background:var(--green-light);
+  display:none;
+}
+
+.success{
+  border-left:5px solid var(--green);
+}
+
+.error{
+  border-left:5px solid red;
+  background:#ffeaea;
+}
+
+.loading{
+  text-align:center;
+  margin-top:15px;
+  display:none;
+  color:var(--green-dark);
+}
+
+.credit{
+  position:fixed;
+  bottom:20px;
+  right:30px;
+  font-family:'Outfit',sans-serif;
+  font-weight:600;
+  background:linear-gradient(90deg,var(--green),#a5d6a7,var(--green));
+  background-size:200% 100%;
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  animation:shimmer 4s linear infinite;
+}
+
+@keyframes shimmer{
+  0%{background-position:-200% 0;}
+  100%{background-position:200% 0;}
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h1>Tra cứu số báo danh</h1>
+  <div class="subtitle">Hệ thống đồng bộ dữ liệu từ trường</div>
+
+  <div class="card">
+    <input type="text" id="keyword" placeholder="Nhập họ tên học sinh">
+    <button id="btn" onclick="search()">Tra cứu</button>
+
+    <div class="loading" id="loading">Đang xử lý...</div>
+
+    <div class="result" id="resultBox"></div>
+  </div>
+</div>
+
+<div class="credit">Design by KhanhDuy</div>
+
+<script>
+async function search(){
+  const keyword=document.getElementById("keyword").value.trim();
+  const btn=document.getElementById("btn");
+  const resultBox=document.getElementById("resultBox");
+  const loading=document.getElementById("loading");
+
+  if(!keyword){
+    showError("Vui lòng nhập họ tên.");
+    return;
+  }
+
+  resultBox.style.display="none";
+  loading.style.display="block";
+  btn.disabled=true;
+
+  try{
+    const res=await fetch("/api/tracuu",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({keyword})
+    });
+
+    if(!res.ok){
+      throw new Error("API lỗi");
+    }
+
+    const data=await res.json();
+
+    loading.style.display="none";
+    btn.disabled=false;
+
+    if(data.success){
+      resultBox.className="result success";
+      resultBox.innerHTML=`
+        <strong>Họ tên:</strong> ${keyword}<br>
+        <strong>Số báo danh:</strong> ${data.id}<br><br>
+        <button onclick="window.location.href='${data.url}'">Xem chi tiết</button>
+      `;
+      resultBox.style.display="block";
+    }else{
+      showError(data.error || "Không tìm thấy thông tin.");
+    }
+
+  }catch(err){
+    loading.style.display="none";
+    btn.disabled=false;
+    showError("Không kết nối được máy chủ.");
+  }
+}
+
+function showError(msg){
+  const resultBox=document.getElementById("resultBox");
+  resultBox.className="result error";
+  resultBox.innerHTML=msg;
+  resultBox.style.display="block";
+}
+</script>
+
+</body>
+</html>
