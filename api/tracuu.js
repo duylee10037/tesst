@@ -28,12 +28,12 @@ body{
 
 .container{
   width:100%;
-  max-width:600px;
+  max-width:650px;
 }
 
 h1{
   font-family:'Outfit',sans-serif;
-  font-size:32px;
+  font-size:34px;
   font-weight:800;
   margin-bottom:10px;
   color:var(--green-dark);
@@ -46,14 +46,19 @@ h1{
 
 .card{
   background:white;
-  padding:40px;
+  padding:45px;
   border-radius:25px;
-  box-shadow:0 20px 50px rgba(0,0,0,0.1);
+  box-shadow:0 25px 60px rgba(0,0,0,0.1);
+  transition:0.3s;
+}
+
+.card:hover{
+  transform:translateY(-5px);
 }
 
 input{
   width:100%;
-  padding:15px;
+  padding:16px;
   border-radius:15px;
   border:2px solid #ddd;
   font-size:15px;
@@ -67,7 +72,7 @@ input:focus{
 
 button{
   width:100%;
-  padding:15px;
+  padding:16px;
   border:none;
   border-radius:40px;
   font-weight:600;
@@ -75,31 +80,16 @@ button{
   color:white;
   cursor:pointer;
   transition:0.3s;
+  box-shadow:0 10px 25px rgba(46,125,50,0.3);
 }
 
 button:hover{
   transform:translateY(-3px);
+  box-shadow:0 15px 35px rgba(46,125,50,0.4);
 }
 
 button:disabled{
   opacity:0.6;
-}
-
-.result{
-  margin-top:25px;
-  padding:20px;
-  border-radius:15px;
-  background:var(--green-light);
-  display:none;
-}
-
-.success{
-  border-left:5px solid var(--green);
-}
-
-.error{
-  border-left:5px solid red;
-  background:#ffeaea;
 }
 
 .loading{
@@ -107,6 +97,30 @@ button:disabled{
   margin-top:15px;
   display:none;
   color:var(--green-dark);
+  font-weight:500;
+}
+
+.result{
+  margin-top:25px;
+  padding:20px;
+  border-radius:15px;
+  display:none;
+  animation:fadeIn 0.4s ease;
+}
+
+.success{
+  background:var(--green-light);
+  border-left:5px solid var(--green);
+}
+
+.error{
+  background:#ffeaea;
+  border-left:5px solid red;
+}
+
+@keyframes fadeIn{
+  from{opacity:0;transform:translateY(20px);}
+  to{opacity:1;transform:translateY(0);}
 }
 
 .credit{
@@ -125,6 +139,12 @@ button:disabled{
 @keyframes shimmer{
   0%{background-position:-200% 0;}
   100%{background-position:200% 0;}
+}
+
+@media(max-width:600px){
+  .card{
+    padding:30px;
+  }
 }
 </style>
 </head>
